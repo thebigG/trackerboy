@@ -2,7 +2,7 @@
 #pragma once
 
 #include <cstdint>
-#include <vector>l
+#include <vector>
 
 namespace trackerboy {
 
