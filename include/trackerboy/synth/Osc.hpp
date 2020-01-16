@@ -2,7 +2,7 @@
 #pragma once
 
 #include <cstdint>
-#include <vector>
+#include <vector>l
 
 namespace trackerboy {
 
@@ -18,7 +18,7 @@ public:
     //
     // Generate a given amount of samples and place them in the given buffer.
     //
-    void generate(int16_t samples[], size_t nsamples);
+    void generate(float samples[], size_t nsamples);
 
     //
     // Returns true if the oscillator is muted
@@ -50,19 +50,50 @@ public:
     //
     void setMute(bool muted);
 
-
-
 protected:
 
     Osc(float samplingRate, size_t multiplier, size_t waveformSize);
+
+    //
+    // POD struct containing information about a delta and its
+    // location in the waveform.
+    //
+    struct Delta {
+        uint8_t location;   // location in the waveform
+        float change;       // the change in volume
+        float before;       // volume before the transition
+        /* to be used by generate() */
+        float position;
+    };
+
+    // the waveform is represented by amplitude changes (deltas)
+    //
+    // some facts:
+    //  * if the sum of all changes is 0, the waveform is periodic, aperiodic otherwise
+    //  * any delta buf with 1 delta is aperiodic
+    //  * an empty delta buf represents a flat wave
+    //  * the sum of the durations is equal to mSamplesPerPeriod
+    //
+    // it is considered an error for a waveform to be aperiodic (although the resulting
+    // output would be periodic due to integer overflow)
+    std::vector<Delta> mDeltaBuf;
 
     //
     // Setup the delta buffer from the given waveform
     //
     void deltaSet(const uint8_t waveform[]);
 
+    bool mRecalc;
+
     const size_t mWaveformSize;
     const size_t mMultiplier;
+
+    //static constexpr float VOLUME_MAX = PI * 0.25f;
+    static constexpr float VOLUME_MAX = 0.6f;
+    //static constexpr float VOLUME_MAX = 1.0f;
+    static constexpr float VOLUME_STEP = VOLUME_MAX * (1 / 8.0f);
+
+    static const float VOLUME_TABLE[16];
 
 private:
 
@@ -77,18 +108,6 @@ private:
     // at a given phase.
     static const float SINC_TABLE[SINC_PHASES][SINC_STEPS];
 
-    //
-    // POD struct containing information about a delta and its
-    // location in the waveform.
-    //
-    struct Delta {
-        int16_t change;     // the change in volume
-        uint8_t location;   // location in the waveform
-        int16_t before;     // volume before the transition
-        /* to be used by generate() */
-        float position;
-    };
-
     // scaling factor: samplingRate / gameboy clock rate
     float mFactor;
 
@@ -100,28 +119,14 @@ private:
 
     // used by generate()
 
-    bool mRecalc;
-
     float mSamplesPerDelta;
 
     float mSamplesPerPeriod;
 
     // last sample generated
-    int16_t mPrevious;
+    float mPrevious;
 
-    int16_t mLeftovers[SINC_STEPS - 1];
-
-    // the waveform is represented by amplitude changes (deltas)
-    //
-    // some facts:
-    //  * if the sum of all changes is 0, the waveform is periodic, aperiodic otherwise
-    //  * any delta buf with 1 delta is aperiodic
-    //  * an empty delta buf represents a flat wave
-    //  * the sum of the durations is equal to mSamplesPerPeriod
-    //
-    // it is considered an error for a waveform to be aperiodic (although the resulting
-    // output would be periodic due to integer overflow)
-    std::vector<Delta> mDeltaBuf;
+    float mLeftovers[SINC_STEPS - 1];
 
     // if true, generate will output 0
     bool mMuted;
