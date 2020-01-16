@@ -16,7 +16,7 @@ our synthesizer's spectrum to match the goal spectrum.
 
 Original                              | Goal
 :------------------------------------:|:-------------------------------------:
-![](misc/frequ_analysis_original.png) | ![](misc/freq_analysis_goal.png)
+![](misc/freq_analysis_original.png) | ![](misc/freq_analysis_goal.png)
 
 
 ## Changes to be made:
