@@ -88,25 +88,18 @@ protected:
     const size_t mWaveformSize;
     const size_t mMultiplier;
 
-    //static constexpr float VOLUME_MAX = PI * 0.25f;
-    static constexpr float VOLUME_MAX = 0.6f;
-    //static constexpr float VOLUME_MAX = 1.0f;
-    static constexpr float VOLUME_STEP = VOLUME_MAX * (1 / 8.0f);
+    static constexpr float VOLUME_MAX = 1.0f;
+    static constexpr float VOLUME_STEP = VOLUME_MAX * (1 / 15.0f);
 
     static const float VOLUME_TABLE[16];
 
 private:
 
-    // number of phases in the sinc table
-    static constexpr size_t SINC_PHASES = 32;
-    // sample size per sinc set
-    static constexpr size_t SINC_STEPS = 15;
-    // center index of the sinc set
-    static constexpr size_t SINC_CENTER = SINC_STEPS / 2;
+    static constexpr size_t STEP_PHASES = 32;
+    static constexpr size_t STEP_WIDTH = 16;
+    static constexpr size_t STEP_CENTER = STEP_WIDTH / 2;
 
-    // table of sinc sets, each set contains samples from a normalized sinc function
-    // at a given phase.
-    static const float SINC_TABLE[SINC_PHASES][SINC_STEPS];
+    static const float STEP_TABLE[STEP_PHASES][STEP_WIDTH];
 
     // scaling factor: samplingRate / gameboy clock rate
     float mFactor;
@@ -126,7 +119,7 @@ private:
     // last sample generated
     float mPrevious;
 
-    float mLeftovers[SINC_STEPS - 1];
+    float mLeftovers[STEP_WIDTH - 1];
 
     // if true, generate will output 0
     bool mMuted;
