@@ -78,11 +78,6 @@ protected:
     // output would be periodic due to integer overflow)
     std::vector<Delta> mDeltaBuf;
 
-    //
-    // Setup the delta buffer from the given waveform
-    //
-    void deltaSet(const uint8_t waveform[]);
-
     bool mRecalc;
 
     const size_t mWaveformSize;
