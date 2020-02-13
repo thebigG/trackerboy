@@ -23,6 +23,7 @@ set(SRC_FILES
     "synth/PulseOsc.cpp"
     "synth/sampletable.cpp"
     "synth/Sequencer.cpp"
+    "synth/Sweep.cpp"
     "synth/SweepPulseChannel.cpp"
     "synth/Synth.cpp"
     "synth/WaveChannel.cpp"
