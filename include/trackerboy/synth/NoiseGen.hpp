@@ -28,7 +28,7 @@ private:
     unsigned mShiftCounter;
     unsigned mShiftCounterMax;
 
-    float mStepsPerSample;
+    unsigned mStepsPerSample;
 };
 
 

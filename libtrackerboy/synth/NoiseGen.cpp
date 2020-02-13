@@ -3,7 +3,9 @@
 
 #include "trackerboy/synth/NoiseGen.hpp"
 
-#define LFSR_INIT 0x7FFF
+#include <cmath>
+
+constexpr uint16_t LFSR_INIT = 0x7FFF;
 #define calcCounterMax(drf, scf) (DRF_TABLE[drf] << (scf+1))
 
 namespace {
@@ -30,8 +32,12 @@ NoiseGen::NoiseGen(float samplingRate) :
     mLfsr(LFSR_INIT),
     mShiftCounter(0),
     mShiftCounterMax(calcCounterMax(mDrf, mScf)),
-    mStepsPerSample(Gbs::CLOCK_SPEED / samplingRate)
+    mStepsPerSample(static_cast<unsigned>(Gbs::CLOCK_SPEED / samplingRate))
 {
+    // NOTES:
+    // mStepsPerSample is an unsigned and not float for performance reasons.
+    // keeping track of the fractional part would result in more accurate
+    // sample generation, however, the difference in output is negligible
 }
 
 
@@ -39,8 +45,9 @@ void NoiseGen::generate(float buf[], size_t nsamples) {
     for (size_t i = 0; i != nsamples; ++i) {
         mShiftCounter += mStepsPerSample;
         unsigned shifts = mShiftCounter / mShiftCounterMax;
-        mShiftCounter %= mShiftCounterMax;
         for (unsigned j = 0; j != shifts; ++j) {
+            // same as mShiftCounter %= mShiftCounterMax outside of loop
+            mShiftCounter -= mShiftCounterMax;
             // xor bits 1 and 0 of the lfsr
             uint8_t result = (mLfsr & 0x1) ^ ((mLfsr >> 1) & 0x1);
             // shift the register
