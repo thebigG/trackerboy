@@ -1,7 +1,6 @@
 
 #include "trackerboy/synth/Osc.hpp"
 #include "trackerboy/gbs.hpp"
-#include "./sampletable.hpp"
 
 #include <algorithm>
 #include <cassert>

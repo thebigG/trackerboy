@@ -1,6 +1,5 @@
 
 #include "trackerboy/synth/PulseOsc.hpp"
-#include "./sampletable.hpp"
 
 namespace trackerboy {
 
