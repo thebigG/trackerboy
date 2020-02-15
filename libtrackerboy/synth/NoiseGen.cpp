@@ -46,10 +46,10 @@ void NoiseGen::generate(float buf[], size_t nsamples, float cps) {
         mDrift = cycles - cyclesWhole;
         // update the shift counter, determine how many shifts are needed
         mShiftCounter += cyclesWhole;
-        unsigned shifts = mShiftCounter / mShiftCounterMax;
-        for (unsigned j = 0; j != shifts; ++j) {
-            // same as mShiftCounter %= mShiftCounterMax outside of loop
+
+        while (mShiftCounter >= mShiftCounterMax) {
             mShiftCounter -= mShiftCounterMax;
+            
             // xor bits 1 and 0 of the lfsr
             uint8_t result = (mLfsr & 0x1) ^ ((mLfsr >> 1) & 0x1);
             // shift the register
@@ -62,6 +62,7 @@ void NoiseGen::generate(float buf[], size_t nsamples, float cps) {
                 mLfsr |= result << 6; // set bit 7 result
             }
         }
+
         if (mLfsr & 0x1) {
             // output is bit 0 inverted, so if bit 0 == 1, output MIN
             *buf++ = 0.0f;
