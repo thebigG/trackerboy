@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ChannelFile.hpp"
+#include "trackerboy/synth/HardwareFile.hpp"
 
 
 namespace trackerboy {
@@ -9,7 +9,7 @@ class Sequencer {
     
 
 public:
-    Sequencer(ChannelFile &cf);
+    Sequencer(HardwareFile &hf);
 
     void reset();
     unsigned step(unsigned cycles);
@@ -19,8 +19,7 @@ private:
 
     enum TriggerType {
         NONE,
-        LC,
-        LC_AND_SWEEP,
+        SWEEP,
         ENV
     };
     struct Trigger {
@@ -31,7 +30,7 @@ private:
 
     static Trigger const TRIGGER_SEQUENCE[];
     
-    ChannelFile &mCf;
+    HardwareFile &mHf;
     unsigned mFreqCounter;
     unsigned mFence;
     unsigned mTriggerIndex;

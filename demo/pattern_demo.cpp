@@ -46,7 +46,7 @@ int main() {
     }
 
     Synth synth(SAMPLING_RATE);
-    auto &mixer = synth.getMixer();
+    auto &mixer = synth.mixer();
     mixer.setTerminalEnable(trackerboy::Gbs::TERM_BOTH, true);
     mixer.setTerminalVolume(trackerboy::Gbs::TERM_BOTH, trackerboy::Gbs::MAX_TERM_VOLUME);
     PlaybackQueue pb(SAMPLING_RATE);

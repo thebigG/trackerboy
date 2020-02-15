@@ -12,7 +12,6 @@ namespace trackerboy {
 //
 // Step:                 | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
 // --------------------------+---+---+---+---+---+---+---+-------------------
-// Len. counter (256 Hz) | x       x       x       x      
 // Sweep        (128 Hz) |         x               x       
 // envelope     ( 64 Hz) |                             x  
 //
@@ -43,34 +42,28 @@ namespace trackerboy {
 //
 
 Sequencer::Trigger const Sequencer::TRIGGER_SEQUENCE[] = {
-    // step 0 trigger, next trigger: 2
-    {1, CYCLES_PER_STEP * 2, TriggerType::LC},
-    // step 2 trigger, next trigger: 4
-    {2, CYCLES_PER_STEP * 2, TriggerType::LC_AND_SWEEP},
-    // step 4 trigger, next trigger: 6
-    {3, CYCLES_PER_STEP * 2, TriggerType::LC},
+    // step 2 trigger, next trigger: 6
+    {1, CYCLES_PER_STEP * 4, TriggerType::SWEEP},
     // step 6 trigger, next trigger: 7
-    {4, CYCLES_PER_STEP,     TriggerType::LC_AND_SWEEP},
-    // step 7 trigger, next trigger: 0
-    {0, CYCLES_PER_STEP,     TriggerType::ENV}
+    {2, CYCLES_PER_STEP,     TriggerType::SWEEP},
+    // step 7 trigger, next trigger: 2
+    {0, CYCLES_PER_STEP * 3, TriggerType::ENV}
 };
 
-Sequencer::Sequencer(ChannelFile &cf) : 
-    mCf(cf),
+Sequencer::Sequencer(HardwareFile &hf) : 
+    mHf(hf),
     mFreqCounter(0),
     mFence(CYCLES_PER_STEP * 2),
     mTriggerIndex(0),
-    mTrigger(TriggerType::LC)
+    mTrigger(TriggerType::NONE)
 {
 }
 
 void Sequencer::reset() {
     mFreqCounter = 0;
-    // on the first step we trigger LC
-    Trigger const &t = TRIGGER_SEQUENCE[4];
-    mFence = t.nextFence;
-    mTriggerIndex = t.nextIndex;
-    mTrigger = t.trigger;
+    mFence = CYCLES_PER_STEP * 2;
+    mTriggerIndex = 0;
+    mTrigger = TriggerType::NONE;
 }
 
 unsigned Sequencer::step(unsigned cycles) {
@@ -78,20 +71,14 @@ unsigned Sequencer::step(unsigned cycles) {
     switch (mTrigger) {
         case TriggerType::NONE:
             break;
-        case TriggerType::LC_AND_SWEEP:
-            mCf.ch1.sweepStep();
-            // fall-through
-        case TriggerType::LC:
-            mCf.ch1.lengthStep();
-            mCf.ch2.lengthStep();
-            mCf.ch3.lengthStep();
-            mCf.ch4.lengthStep();
+        case TriggerType::SWEEP:
+            mHf.sweep1.trigger();
             mTrigger = TriggerType::NONE;
             break;
         case TriggerType::ENV:
-            mCf.ch1.envStep();
-            mCf.ch2.envStep();
-            mCf.ch4.envStep();
+            mHf.env1.trigger();
+            mHf.env2.trigger();
+            mHf.env4.trigger();
             mTrigger = TriggerType::NONE;
             break;
     }
