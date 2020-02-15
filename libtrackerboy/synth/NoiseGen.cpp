@@ -25,25 +25,27 @@ static const uint8_t DRF_TABLE[] = {
 
 namespace trackerboy {
 
-NoiseGen::NoiseGen(float samplingRate) :
+NoiseGen::NoiseGen() :
     mScf(Gbs::DEFAULT_SCF),
     mStepSelection(Gbs::DEFAULT_STEP_COUNT),
     mDrf(Gbs::DEFAULT_DRF),
     mLfsr(LFSR_INIT),
     mShiftCounter(0),
     mShiftCounterMax(calcCounterMax(mDrf, mScf)),
-    mStepsPerSample(static_cast<unsigned>(Gbs::CLOCK_SPEED / samplingRate))
+    mDrift(0.0f)
 {
-    // NOTES:
-    // mStepsPerSample is an unsigned and not float for performance reasons.
-    // keeping track of the fractional part would result in more accurate
-    // sample generation, however, the difference in output is negligible
 }
 
 
-void NoiseGen::generate(float buf[], size_t nsamples) {
+void NoiseGen::generate(float buf[], size_t nsamples, float cps) {
     for (size_t i = 0; i != nsamples; ++i) {
-        mShiftCounter += mStepsPerSample;
+        // determine the number of cylces to run for this sample
+        float cycles = cps + mDrift;
+        unsigned cyclesWhole = static_cast<unsigned>(cycles);
+        // drift is the fractional part of the total cycles
+        mDrift = cycles - cyclesWhole;
+        // update the shift counter, determine how many shifts are needed
+        mShiftCounter += cyclesWhole;
         unsigned shifts = mShiftCounter / mShiftCounterMax;
         for (unsigned j = 0; j != shifts; ++j) {
             // same as mShiftCounter %= mShiftCounterMax outside of loop
@@ -73,6 +75,7 @@ void NoiseGen::generate(float buf[], size_t nsamples) {
 
 void NoiseGen::reset() {
     mShiftCounter = 0;
+    mDrift = 0.0f;
     mLfsr = LFSR_INIT;
 }
 

@@ -10,9 +10,9 @@ class NoiseGen {
 
 public:
 
-    NoiseGen(float samplingRate);
+    NoiseGen();
 
-    void generate(float buf[], size_t nsamples);
+    void generate(float buf[], size_t nsamples, float cps);
 
     void reset();
 
@@ -27,8 +27,8 @@ private:
     uint16_t mLfsr;
     unsigned mShiftCounter;
     unsigned mShiftCounterMax;
-
-    unsigned mStepsPerSample;
+    // the fractional part that is truncated when generating samples
+    float mDrift;
 };
 
 

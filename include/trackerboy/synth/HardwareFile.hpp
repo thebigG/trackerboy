@@ -29,7 +29,7 @@ struct HardwareFile {
         osc1(samplingRate),
         osc2(samplingRate),
         osc3(samplingRate),
-        gen4(samplingRate)
+        gen4()
     {
     }
 
