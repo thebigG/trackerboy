@@ -17,7 +17,6 @@ set(SRC_FILES
     "synth/NoiseGen.cpp"
     "synth/Osc.cpp"
     "synth/PulseOsc.cpp"
-    "synth/Sequencer.cpp"
     "synth/Sweep.cpp"
     "synth/Synth.cpp"
     "synth/Waveform.cpp"

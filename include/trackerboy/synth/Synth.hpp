@@ -1,8 +1,9 @@
 #pragma once
 
-#include "HardwareFile.hpp"
-#include "Mixer.hpp"
-#include "Sequencer.hpp"
+#include <vector>
+
+#include "trackerboy/synth/HardwareFile.hpp"
+#include "trackerboy/synth/Mixer.hpp"
 
 
 namespace trackerboy {
@@ -15,18 +16,42 @@ public:
 
     HardwareFile& hardware();
     Mixer& mixer();
-    Sequencer& sequencer();
 
     void fill(float buf[], size_t nsamples);
 
 private:
 
+    enum TriggerType {
+        NONE,
+        SWEEP,
+        ENV
+    };
+
+    // three triggers, two for sweep and one for envelope
+    static constexpr size_t TRIGGER_COUNT = 3;
+    // trigger sequence
+    static TriggerType const TRIGGER_SEQUENCE[TRIGGER_COUNT];
+
+
+
     float mSamplingRate;
 
     HardwareFile mHf;
     Mixer mMixer;
-    Sequencer mSequencer;
 
+    // number of cycles needed to execute to produce 1 sample
+    // equal to the gameboy clock speed divided by the sampling rate
+    float mCyclesPerSample;
+
+    // sample times between each trigger
+    float mTriggerTimings[3];
+
+    float mSampleCounter;
+    float mSamplesToTrigger;
+    unsigned mTriggerIndex;
+
+    // input buffer for generating samples, size is the largest trigger timing
+    std::vector<float> mInputBuffer;
 
 };
 
