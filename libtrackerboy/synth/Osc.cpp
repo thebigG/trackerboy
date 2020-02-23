@@ -85,109 +85,113 @@ void Osc::generate(float buf[], size_t nsamples) {
     // and the frequency is below or equal to the nyquist frequency
     if (!mMuted && mDeltaBuf.size() > 0 && mFrequency <= mNyquist) {
 
-        auto deltaEnd = mDeltaBuf.end();
-
-        if (mRecalc) {
+        if (mNewFrequency) {
             // frequency and/or waveform changed, recalculate deltas
-            mSamplesPerDelta = (2048 - mFrequency) * mMultiplier * mFactor;
+            float newspd = (2048 - mFrequency) * mMultiplier * mFactor;
+            
+            // adjust phase proportionally to the old spd
+            mPhase *= newspd / mSamplesPerDelta;
+            if (!mNewPeriod) {
+                // reposition the deltas with the new spd
+                for (auto &d : mDeltaBuf) {
+                    d.position = d.location * newspd;
+                }
+            }
+
+            mSamplesPerDelta = newspd;
             mSamplesPerPeriod = mSamplesPerDelta * mWaveformSize;
+            mNewFrequency = false;
+        }
 
-            resetPeriod();
+        if (mNewPeriod) {
+            // calculate initial positions
+            bool found = false;
+            for (auto &d : mDeltaBuf) {
+                d.position = d.location * mSamplesPerDelta;
+                if (!found && d.position >= mPhase) {
+                    mPrevious = d.before;
+                    found = true;
+                }
+            }
 
-            mRecalc = false;
+            if (!found) {
+                mPrevious = mDeltaBuf[0].before;
+            }
+            mNewPeriod = false;
         } else {
-            // we are continuing the existing waveform,
-            // copy the leftovers to the start
+            // copy leftovers
             std::copy_n(mLeftovers, STEP_WIDTH - 1, buf);
         }
-        // clear the leftover buffer
+
+        // clear leftovers
         std::fill_n(mLeftovers, STEP_WIDTH - 1, 0.0f);
 
-        // add the transitions (sinc sets)
+        for (auto &delta : mDeltaBuf) {
+            float position = delta.position - mPhase;
+            float change = delta.change;
 
-        // add steps for each delta until this limit is reached
-        const size_t limit = nsamples + STEP_CENTER;
-        // when a center of transition exceeds this limit, the transition is outside of the output buffer
-        // (which will be the first transition to generate on the next call)
-        for (auto iter = mDeltaBuf.begin(); iter != deltaEnd; ++iter) {
-            // cache these values
-            float position = iter->position; // this is the location in the buffer, in samples, of the current transition 
-            float change = iter->change;
+            while (position < nsamples) {
 
-            while (position < limit) {
+                if (position > 0.0f) {
 
-                float positionWhole;
-                float positionFract = modff(position, &positionWhole);
-                // index of the center of the step
-                size_t centerIndex = static_cast<size_t>(positionWhole);
-                // the sinc set chosen is determined by the fractional part of position
-                float phase = positionFract * STEP_PHASES;
+                    float positionWhole;
+                    float positionFract = modff(position, &positionWhole);
+                    // index in buffer of the step
+                    size_t stepIndex = static_cast<size_t>(positionWhole);
+                    // the step set chosen is determined by the fractional part of position
+                    float phase = positionFract * STEP_PHASES;
 
-                const float *sincset = STEP_TABLE[static_cast<size_t>(phase)];
+                    const float *stepset = STEP_TABLE[static_cast<size_t>(phase)];
 
-                // ending index of the band limited step
-                size_t endIndex = centerIndex + (STEP_WIDTH - STEP_CENTER);
+                    // determine how much of the step we can add
+                    size_t endIndex = stepIndex + STEP_WIDTH;
+                    size_t stepEnd = STEP_WIDTH;
+                    if (endIndex > nsamples) {
+                        // step exceeds buffer
+                        stepEnd -= endIndex - nsamples;
+                    }
 
-                // determine the range of the set to use
-                size_t sincStart;
-                size_t sincEnd;
-                float *dest = buf;
+                    // add the step
+                    float error = change; // roundoff error
+                    float *dest = buf + stepIndex;
+                    for (size_t i = 0; i != stepEnd; ++i) {
+                        float sample = change * stepset[i];
+                        error -= sample;
+                        *dest++ += sample;
+                    }
 
-                if (centerIndex < STEP_CENTER) {
-                    // we are at the start of the buffer
-                    sincStart = STEP_CENTER - centerIndex;
-                } else {
-                    // we are somewhere in between
-                    sincStart = 0;
-                    // point dest to the start of the step
-                    dest += centerIndex - STEP_CENTER;
+                    // add to leftovers if needed
+                    dest = mLeftovers;
+                    for (size_t i = stepEnd; i != STEP_WIDTH; ++i) {
+                        float sample = change * stepset[i];
+                        error -= sample;
+                        *dest++ += sample;
+                    }
+
+                    // add the error
+                    size_t center = stepIndex + STEP_CENTER;
+                    if (center >= nsamples) {
+                        // add error to leftovers
+                        mLeftovers[center - nsamples] += error;
+                    } else {
+                        buf[center] += error;
+                    }
+
                 }
 
-                if (endIndex > nsamples) {
-                    // we are at the end of the buffer
-                    sincEnd = STEP_WIDTH - (endIndex - nsamples);
-                } else {
-                    sincEnd = STEP_WIDTH;
-                }
-
-                // copy to the buffer
-                float error = change;  // precision error
-                for (size_t i = sincStart; i != sincEnd; ++i) {
-                    float sample = change * sincset[i];
-                    error -= sample;
-                    *dest++ += sample;
-                }
-
-                // copy to leftovers (if needed)
-                dest = mLeftovers;
-                for (size_t i = sincEnd; i != STEP_WIDTH; ++i) {
-                    float sample = change * sincset[i];
-                    error -= sample;
-                    *dest++ += sample;
-                }
-
-                // add the error so that the sum of the step is equal to change
-                // (this error comes from taking the floor of a sample in the step)
-                if (centerIndex >= nsamples) {
-                    mLeftovers[centerIndex - nsamples] += error;
-                } else {
-                    buf[centerIndex] += error;
-                }
-
-
-                // next period
+                // advance position to the next period
                 position += mSamplesPerPeriod;
             }
 
-            iter->position = position - nsamples;
-
         }
+
+        // determine phase for the next generation
+        mPhase = fmodf(nsamples + mPhase, mSamplesPerPeriod);
 
         // do the running sum
         for (size_t i = 0; i != nsamples; ++i) {
             *buf += mPrevious;
             mPrevious = *buf++;
-            //assert(mPrevious <= 1.0f && mPrevious >= -1.0f);
         }
 
     }
@@ -207,15 +211,17 @@ float Osc::outputFrequency() {
 }
 
 void Osc::reset() {
-    // just reset the period if the frequency/waveform is unchanged
-    if (!mRecalc) {
-        resetPeriod();
+    mPhase = 0.0f;
+    if (mDeltaBuf.size() > 0) {
+        mPrevious = mDeltaBuf[0].before;
     }
 }
 
 void Osc::setFrequency(uint16_t frequency) {
-    mFrequency = frequency;
-    mRecalc = true;
+    if (frequency != mFrequency) {
+        mFrequency = frequency;
+        mNewFrequency = true;
+    }
 }
 
 
@@ -232,13 +238,15 @@ Osc::Osc(float samplingRate, size_t multiplier, size_t waveformSize) :
     mWaveformSize(waveformSize),
     mFactor(samplingRate / Gbs::CLOCK_SPEED),
     mFrequency(Gbs::DEFAULT_FREQUENCY),
-    mRecalc(true),
-    mSamplesPerDelta(0.0f),
-    mSamplesPerPeriod(0.0f),
+    mNewFrequency(true),
+    mNewPeriod(true),
+    mSamplesPerDelta((2048 - mFrequency) * mMultiplier * mFactor),
+    mSamplesPerPeriod(mSamplesPerPeriod * mWaveformSize),
     mPrevious(0),
     mLeftovers{ 0 },
     mDeltaBuf(),
-    mMuted(false)
+    mMuted(false),
+    mPhase(0.0f)
 {
     // assert that waveform size is a power of 2
     assert((mWaveformSize & (mWaveformSize - 1)) == 0);
@@ -246,16 +254,6 @@ Osc::Osc(float samplingRate, size_t multiplier, size_t waveformSize) :
     float nyquist = samplingRate * 0.5f;
     mNyquist = static_cast<uint16_t>(2048 - Gbs::CLOCK_SPEED / (nyquist * multiplier * waveformSize));
 
-}
-
-void Osc::resetPeriod() {
-    // calculate initial positions
-    for (auto iter = mDeltaBuf.begin(); iter != mDeltaBuf.end(); ++iter) {
-        iter->position = iter->location * mSamplesPerDelta;
-    }
-
-    // initialize previous with the starting sample of the waveform
-    mPrevious = mDeltaBuf[0].before;
 }
 
 }

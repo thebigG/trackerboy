@@ -78,7 +78,8 @@ protected:
     // output would be periodic due to integer overflow)
     std::vector<Delta> mDeltaBuf;
 
-    bool mRecalc;
+    bool mNewFrequency;
+    bool mNewPeriod;
 
     const size_t mWaveformSize;
     const size_t mMultiplier;
@@ -119,8 +120,9 @@ private:
     // if true, generate will output 0
     bool mMuted;
 
-    // setup timing information for generating samples at the start of the period
-    void resetPeriod();
+    // offset
+    float mPhase;
+
 
 };
 

@@ -71,7 +71,7 @@ void PulseOsc::setDeltaBuf() {
             break;
     }
 
-    mRecalc = true;
+    mNewPeriod = true;
 }
 
 

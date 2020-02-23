@@ -60,7 +60,7 @@ void WaveOsc::setWaveform(Waveform &wave) {
         }
     }
 
-    mRecalc = true;
+    mNewPeriod = true;
 }
 
 
