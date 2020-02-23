@@ -39,9 +39,8 @@ void Sweep::trigger() {
                 } else {
                     sweepfreq = shadow + sweepfreq;
                     if (sweepfreq > Gbs::MAX_FREQUENCY) {
-                        // sweep will overflow, disable the channel
-                        // TODO: decide how disabling will work
-                        //disable();
+                        // sweep will overflow, disable the oscillator
+                        mOsc.disable();
                         return;
                     }
                 }

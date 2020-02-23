@@ -73,6 +73,10 @@ const float Osc::VOLUME_TABLE[16] = {
 
 // Public methods ------------------------------------------------------------
 
+void Osc::disable() {
+    mDisabled = true;
+}
+
 uint16_t Osc::frequency() {
     return mFrequency;
 }
@@ -81,9 +85,9 @@ void Osc::generate(float buf[], size_t nsamples) {
     // first, clear the output buffer
     std::fill_n(buf, nsamples, 0.0f);
 
-    // generate samples if the waveform is not flat and we aren't muted
+    // generate samples if the waveform is not flat and we aren't disabled
     // and the frequency is below or equal to the nyquist frequency
-    if (!mMuted && mDeltaBuf.size() > 0 && mFrequency <= mNyquist) {
+    if (!mDisabled && mDeltaBuf.size() > 0 && mFrequency <= mNyquist) {
 
         if (mNewFrequency) {
             // frequency and/or waveform changed, recalculate deltas
@@ -198,10 +202,6 @@ void Osc::generate(float buf[], size_t nsamples) {
 
 }
 
-bool Osc::muted() {
-    return mMuted;
-}
-
 float Osc::outputFrequency() {
     // period of the oscilator is (2048 - mFrequency) * multiplier * waveformSize
     // example ranges (multiplier, waveformSize)
@@ -215,6 +215,7 @@ void Osc::reset() {
     if (mDeltaBuf.size() > 0) {
         mPrevious = mDeltaBuf[0].before;
     }
+    mDisabled = false;
 }
 
 void Osc::setFrequency(uint16_t frequency) {
@@ -223,12 +224,6 @@ void Osc::setFrequency(uint16_t frequency) {
         mNewFrequency = true;
     }
 }
-
-
-void Osc::setMute(bool muted) {
-    mMuted = muted;
-}
-
 
 // protected methods ---------------------------------------------------------
 
@@ -245,7 +240,7 @@ Osc::Osc(float samplingRate, size_t multiplier, size_t waveformSize) :
     mPrevious(0),
     mLeftovers{ 0 },
     mDeltaBuf(),
-    mMuted(false),
+    mDisabled(false),
     mPhase(0.0f)
 {
     // assert that waveform size is a power of 2

@@ -11,6 +11,12 @@ class Osc {
 public:
 
     //
+    // Disables oscillator output, generate will only silence. To re-enable,
+    // call reset()
+    //
+    void disable();
+
+    //
     // Returns the current frequency setting.
     //
     uint16_t frequency();
@@ -19,11 +25,6 @@ public:
     // Generate a given amount of samples and place them in the given buffer.
     //
     void generate(float samples[], size_t nsamples);
-
-    //
-    // Returns true if the oscillator is muted
-    //
-    bool muted();
 
     //
     // Returns the actual frequency being outputted, in hertz.
@@ -44,11 +45,6 @@ public:
     // instead in order to prevent aliasing.
     //
     void setFrequency(uint16_t frequency);
-
-    //
-    // Mute the oscillator. When muted, the oscillator will only output 0 (silence)
-    //
-    void setMute(bool muted);
 
 protected:
 
@@ -118,7 +114,9 @@ private:
     float mLeftovers[STEP_WIDTH - 1];
 
     // if true, generate will output 0
-    bool mMuted;
+    //bool mMuted;
+
+    bool mDisabled;
 
     // offset
     float mPhase;
