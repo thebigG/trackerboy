@@ -16,6 +16,8 @@ public:
     //
     void disable();
 
+    bool disabled();
+
     //
     // Returns the current frequency setting.
     //

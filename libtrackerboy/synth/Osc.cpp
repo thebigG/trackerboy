@@ -77,6 +77,10 @@ void Osc::disable() {
     mDisabled = true;
 }
 
+bool Osc::disabled() {
+    return mDisabled;
+}
+
 uint16_t Osc::frequency() {
     return mFrequency;
 }

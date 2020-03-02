@@ -114,9 +114,8 @@ void InstrumentRuntime::step(Synth &synth, WaveTable &wtable, uint8_t rowVol, ui
         if (inst.ctrl & Instruction::CTRL_PANNING) {
             bool leftEnable = inst.ctrl & Instruction::PANNING_LEFT;
             bool rightEnable = inst.ctrl & Instruction::PANNING_RIGHT;
-            auto &mixer = synth.mixer();
-            mixer.setEnable(mTrackId, Gbs::TERM_LEFT, leftEnable);
-            mixer.setEnable(mTrackId, Gbs::TERM_RIGHT, rightEnable);
+            synth.setOutputEnable(mTrackId, Gbs::TERM_LEFT, leftEnable);
+            synth.setOutputEnable(mTrackId, Gbs::TERM_RIGHT, rightEnable);
         }
 
         // envelope settings (all tracks except 3)

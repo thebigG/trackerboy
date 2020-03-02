@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "trackerboy/synth/HardwareFile.hpp"
-#include "trackerboy/synth/Mixer.hpp"
+#include "trackerboy/ChType.hpp"
 
 
 namespace trackerboy {
@@ -15,9 +15,11 @@ public:
     Synth(float samplingRate);
 
     HardwareFile& hardware();
-    Mixer& mixer();
 
     void fill(float buf[], size_t nsamples);
+
+    void setOutputEnable(Gbs::OutputFlags flags);
+    void setOutputEnable(ChType ch, Gbs::Terminal terminal, bool enabled);
 
 private:
 
@@ -37,7 +39,6 @@ private:
     float mSamplingRate;
 
     HardwareFile mHf;
-    Mixer mMixer;
 
     // number of cycles needed to execute to produce 1 sample
     // equal to the gameboy clock speed divided by the sampling rate
@@ -52,6 +53,13 @@ private:
 
     // input buffer for generating samples, size is the largest trigger timing
     std::vector<float> mInputBuffer;
+
+    uint8_t mOutputStat;
+
+    // methods
+
+    template <ChType ch>
+    void run(float inbuf[], float out[], size_t nsamples);
 
 };
 
