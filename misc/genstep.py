@@ -14,6 +14,14 @@ import sys
 import ctypes
 
 
+def sinc(angle):
+    if angle == 0:
+        return 1
+    else:
+        piangle = math.pi * angle
+        return math.sin(piangle) / piangle
+
+
 def stepset(samplingRate, frequency, phase, width):
     
     sset = []
@@ -24,7 +32,7 @@ def stepset(samplingRate, frequency, phase, width):
     # 0.777 is the amplitude of that the square wave approaches, multiply by
     # this value to get it to approach 0.5 instead (then we add 0.5 to every
     # sample to get the wave from 0 - 1.0)
-    amplitude = 0.5 / 0.777
+    amplitude = 0.5 / 0.7853
 
     # center index
     half = width // 2
@@ -37,7 +45,9 @@ def stepset(samplingRate, frequency, phase, width):
 
         # add the sines of every odd harmonic
         for h in range(1, harmonics, 2):
-            sample += amplitude * (math.sin(h * 2 * math.pi * angle * frequency) / h)
+            # reduce gibbs phenomenon using sigma approximation
+            lanczos = sinc(h / harmonics)
+            sample += lanczos * amplitude * (math.sin(h * 2 * math.pi * angle * frequency) / h)
         
         sset.append(sample)
 
