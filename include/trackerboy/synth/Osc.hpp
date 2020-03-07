@@ -40,6 +40,8 @@ public:
     //
     void reset();
 
+    void run(size_t nsamples);
+
     //
     // Sets the frequency of the waveform. Valid frequencies range from 0 to
     // 2047 inclusive. If the output frequency of the given frequency exceeds
@@ -47,6 +49,17 @@ public:
     // instead in order to prevent aliasing.
     //
     void setFrequency(uint16_t frequency);
+
+    // delete this later
+
+    void fillPeriod();
+    std::vector<float>& period();
+
+    static constexpr unsigned PERIOD_BUFFER_SIZE_DEFAULT = 100;
+
+    static constexpr unsigned PERIOD_BUFFER_SIZE_MAX = 1000;
+    // 1/64 of the sampling rate ~ 16 milleseconds
+    static constexpr unsigned PERIOD_BUFFER_SIZE_MIN = 16;
 
 protected:
 
@@ -76,15 +89,17 @@ protected:
     // output would be periodic due to integer overflow)
     std::vector<Delta> mDeltaBuf;
 
-    bool mNewFrequency;
-    bool mNewPeriod;
+    // if true the period will be regenerated
+    bool mRegenPeriod;
 
     const size_t mWaveformSize;
     const size_t mMultiplier;
 
     static constexpr float VOLUME_MAX = 1.0f;
-    static constexpr float VOLUME_STEP = VOLUME_MAX * (1 / 15.0f);
+    static constexpr float VOLUME_MIN = -1.0f;
+    static constexpr float VOLUME_STEP = 1.0f / 7.5f;
 
+    // not needed remove later
     static const float VOLUME_TABLE[16];
 
 private:
@@ -104,25 +119,18 @@ private:
     // highest allowable frequency that is <= the nyquist frequency
     uint16_t mNyquist;
 
-    // used by generate()
-
-    float mSamplesPerDelta;
-
-    float mSamplesPerPeriod;
-
-    // last sample generated
-    float mPrevious;
-
-    float mLeftovers[STEP_WIDTH - 1];
-
-    // if true, generate will output 0
-    //bool mMuted;
-
     bool mDisabled;
 
-    // offset
-    float mPhase;
+    // maximum size of the period buffer in milleseconds
+    unsigned mPeriodBufSize;
 
+    std::vector<float> mPeriodBuf;
+    size_t mPeriodOffset;
+
+
+    // private methods
+
+    //void fillPeriod();
 
 };
 

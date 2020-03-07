@@ -48,10 +48,7 @@ void WaveOsc::setWaveform(Waveform &wave) {
 
         if (delta) {
             Delta d;
-            d.change = VOLUME_TABLE[abs(delta)];
-            if (delta < 0) {
-                d.change = -d.change;
-            }
+            d.change = VOLUME_STEP * delta;
             d.location = static_cast<uint8_t>(i);
             d.before = previous;
             previous += d.change;
@@ -60,7 +57,7 @@ void WaveOsc::setWaveform(Waveform &wave) {
         }
     }
 
-    mNewPeriod = true;
+    mRegenPeriod = true;
 }
 
 
