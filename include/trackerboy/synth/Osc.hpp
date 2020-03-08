@@ -99,9 +99,6 @@ protected:
     static constexpr float VOLUME_MIN = -1.0f;
     static constexpr float VOLUME_STEP = 1.0f / 7.5f;
 
-    // not needed remove later
-    static const float VOLUME_TABLE[16];
-
 private:
 
     static constexpr size_t STEP_PHASES = 32;

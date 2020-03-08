@@ -26,7 +26,7 @@ void WaveOsc::setWaveform(Waveform &wave) {
     size_t waveIndex = 0;
     //size_t deltaIndex = 0;
 
-    float previous = VOLUME_TABLE[wavedata[0] >> 4];
+    float previous = (wavedata[0] >> 4) * VOLUME_STEP - VOLUME_MIN;
 
     for (size_t i = 0; i != mWaveformSize; ++i) {
 
