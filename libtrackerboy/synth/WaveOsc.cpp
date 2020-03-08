@@ -24,9 +24,8 @@ void WaveOsc::setWaveform(Waveform &wave) {
     size_t mask = bufsize - 1;
     uint8_t lo; // keep lo out here cause we need the last one for initSample
     size_t waveIndex = 0;
-    //size_t deltaIndex = 0;
 
-    float previous = (wavedata[0] >> 4) * VOLUME_STEP - VOLUME_MIN;
+    mInitialVolume = (wavedata[0] >> 4) * VOLUME_STEP - VOLUME_MIN;
 
     for (size_t i = 0; i != mWaveformSize; ++i) {
 
@@ -50,10 +49,7 @@ void WaveOsc::setWaveform(Waveform &wave) {
             Delta d;
             d.change = VOLUME_STEP * delta;
             d.location = static_cast<uint8_t>(i);
-            d.before = previous;
-            previous += d.change;
             mDeltaBuf.push_back(d);
-            //++deltaIndex;
         }
     }
 

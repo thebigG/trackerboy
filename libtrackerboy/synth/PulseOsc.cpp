@@ -37,40 +37,36 @@ void PulseOsc::setDeltaBuf() {
             // 00 00 00 0F -> -F, 0, 0, 0, 0, 0, 0, +F
             first.location = 0;
             first.change = DOWN;
-            first.before = VOLUME_MAX;
             second.location = 7;
             second.change = UP;
-            second.before = VOLUME_MIN;
+            mInitialVolume = VOLUME_MAX;
             break;
         case Gbs::DUTY_25:
             // F000000F -> -F, 0, 0, 0, 0, 0, +F, 0
             // F0 00 00 0F -> 0, -F, 0, 0, 0, 0, 0, +F
             first.location = 1;
             first.change = DOWN;
-            first.before = VOLUME_MAX;
             second.location = 7;
             second.change = UP;
-            second.before = VOLUME_MIN;
+            mInitialVolume = VOLUME_MAX;
             break;
         case Gbs::DUTY_50:
             // F0000FFF -> -F, 0, 0, 0, +F, 0, 0, 0
             // F0 00 0F FF -> 0, -F, 0, 0, 0, +F, 0, 0
             first.location = 1;
             first.change = DOWN;
-            first.before = VOLUME_MAX;
             second.location = 5;
             second.change = UP;
-            second.before = VOLUME_MIN;
+            mInitialVolume = VOLUME_MAX;
             break;
         case Gbs::DUTY_75:
             // 0FFFFFF0 -> +F, 0, 0, 0, 0, 0, -F, 0
             // 0F FF FF F0 -> 0, +F, 0, 0, 0, 0, 0, -F
             first.location = 1;
             first.change = UP;
-            first.before = VOLUME_MIN;
             second.location = 7;
             second.change = DOWN;
-            second.before = VOLUME_MAX;
+            mInitialVolume = VOLUME_MIN;
             break;
         default:
             break;

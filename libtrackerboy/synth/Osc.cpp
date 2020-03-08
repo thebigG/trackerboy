@@ -169,6 +169,7 @@ Osc::Osc(float samplingRate, size_t multiplier, size_t waveformSize) :
     mFactor(samplingRate / Gbs::CLOCK_SPEED),
     mFrequency(Gbs::DEFAULT_FREQUENCY),
     mDeltaBuf(),
+    mInitialVolume(0.0f),
     mRegenPeriod(true),
     mDisabled(false),
     mPeriodBufSize(PERIOD_BUFFER_SIZE_DEFAULT),
@@ -305,7 +306,7 @@ void Osc::fillPeriod() {
 
         // do the running sum
 
-        float previous = mDeltaBuf[0].before;
+        float previous = mInitialVolume;
         for (size_t i = 0; i != bufsize; ++i) {
             float cur = mPeriodBuf[i] + previous;
             mPeriodBuf[i] = cur;

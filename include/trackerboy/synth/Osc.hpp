@@ -72,9 +72,6 @@ protected:
     struct Delta {
         uint8_t location;   // location in the waveform
         float change;       // the change in volume
-        float before;       // volume before the transition
-        /* to be used by generate() */
-        float position;
     };
 
     // the waveform is represented by amplitude changes (deltas)
@@ -88,6 +85,8 @@ protected:
     // it is considered an error for a waveform to be aperiodic (although the resulting
     // output would be periodic due to integer overflow)
     std::vector<Delta> mDeltaBuf;
+
+    float mInitialVolume;
 
     // if true the period will be regenerated
     bool mRegenPeriod;
