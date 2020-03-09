@@ -18,11 +18,10 @@ public:
 
     static constexpr uint8_t DEFAULT_RPB = 4;
     static constexpr float DEFAULT_TEMPO = 150.0f;
-    static constexpr uint8_t TABLE_CODE = 'S';
+    // Tempo = 150, RPB = 4  => 6 frames per row
+    static constexpr Q53 DEFAULT_SPEED = Q53_make(6, 0);
 
     Song();
-
-    FormatError deserialize(std::ifstream &stream);
 
     uint8_t rowsPerBeat();
 
@@ -36,17 +35,18 @@ public:
 
     std::vector<Pattern>& patterns();
 
-    void serialize(std::ofstream &stream);
-
     void setRowsPerBeat(uint8_t rowsPerBeat);
 
     void setTempo(float tempo);
+
+    // sets the speed from the tempo and rowsPerBeat settings
+    void setSpeed();
 
     void setSpeed(Q53 speed);
 
 private:
 
-    void calcSpeed();
+    //void calcSpeed();
 
     std::vector<Pattern> mPatterns;
     Order mOrder;

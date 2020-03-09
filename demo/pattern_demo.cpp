@@ -48,14 +48,13 @@ int main() {
     Synth synth(SAMPLING_RATE);
     PlaybackQueue pb(SAMPLING_RATE);
 
-    Instrument inst;
+    InstrumentTable itable;
+    WaveTable wtable;
+
+    Instrument &inst = itable.insert(0, "test instrument");
     auto &prgm = inst.getProgram();
     prgm.push_back({ 1, 0x8E, 0x0, 0xF0, trackerboy::NOTE_NONE });
     //prgm.push_back({ 1, 0x87, 0x0, 0x00, trackerboy::NOTE_NONE });
-
-    InstrumentTable itable;
-    WaveTable wtable;
-    itable.add(inst);
 
 
 

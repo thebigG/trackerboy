@@ -28,9 +28,9 @@ public:
 
     void clear(uint8_t rowStart, uint8_t rowEnd);
 
-    Iterator end();
+    TrackRow* data();
 
-    void serialize(std::ofstream &stream);
+    Iterator end();
 
     void setSize(size_t nrows);
 

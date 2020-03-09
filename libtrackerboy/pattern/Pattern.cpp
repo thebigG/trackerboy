@@ -34,14 +34,12 @@ void Pattern::clear(uint8_t rowStart, uint8_t rowEnd) {
     } while (rowStart++ != rowEnd);
 }
 
-Pattern::Iterator Pattern::end() {
-    return mData.cend();
+TrackRow* Pattern::data() {
+    return mData.data();
 }
 
-void Pattern::serialize(std::ofstream &stream) {
-    stream.write(reinterpret_cast<const char *>(&mSize), 1);
-
-    stream.write(reinterpret_cast<const char *>(mData.data()), mData.size());
+Pattern::Iterator Pattern::end() {
+    return mData.cend();
 }
 
 void Pattern::setSize(size_t nrows) {

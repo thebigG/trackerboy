@@ -40,9 +40,18 @@ public:
 
     std::vector<uint8_t>& indexVec();
 
-    void setLoop(uint8_t index);
+    //
+    // Returns the index the order will return to on loop. If no loop was set,
+    // zero is returned.
+    //
+    uint8_t loopIndex();
 
-    void serialize(std::ofstream &stream);
+    //
+    // Returns true if the order has a loop index set, false otherwise
+    //
+    bool loops();
+
+    void setLoop(uint8_t index);
 
     void removeLoop();
 

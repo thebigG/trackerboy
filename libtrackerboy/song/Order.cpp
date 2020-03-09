@@ -18,19 +18,12 @@ std::vector<uint8_t>& Order::indexVec() {
     return mIndexVec;
 }
 
-void Order::serialize(std::ofstream &stream) {
-    uint8_t byte = static_cast<uint8_t>(mLoops);
-    stream.write(reinterpret_cast<const char *>(&byte), 1);
+uint8_t Order::loopIndex() {
+    return (mLoops) ? mLoopIndex : 0;
+}
 
-    stream.write(reinterpret_cast<const char *>(&mLoopIndex), 1);
-    
-    byte = static_cast<uint8_t>(mIndexVec.size());
-    stream.write(reinterpret_cast<const char *>(&byte), 1);
-
-    uint32_t word = correctEndian(static_cast<uint32_t>(4 + stream.tellp()));
-    stream.write(reinterpret_cast<const char *>(&word), 4);
-
-    stream.write(reinterpret_cast<const char *>(mIndexVec.data()), mIndexVec.size());
+bool Order::loops() {
+    return mLoops;
 }
 
 void Order::setLoop(uint8_t index) {
