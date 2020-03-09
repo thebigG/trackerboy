@@ -51,7 +51,7 @@ void NoiseGen::generate(float buf[], size_t nsamples, float cps) {
 
         if (mLfsr & 0x1) {
             // output is bit 0 inverted, so if bit 0 == 1, output MIN
-            *buf++ = 0.0f;
+            *buf++ = -1.0f;
         } else {
             *buf++ = 1.0f;
         }
