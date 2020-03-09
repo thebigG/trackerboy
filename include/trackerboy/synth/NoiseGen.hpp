@@ -16,10 +16,15 @@ public:
 
     void reset();
 
+    void run(size_t nsamples, float cps);
+
     void setNoise(uint8_t reg);
 
 
 private:
+
+    // shift the lfsr as needed
+    void shift();
 
     // scf: Shift clock frequency
     uint8_t mScf;

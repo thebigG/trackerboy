@@ -47,21 +47,7 @@ void NoiseGen::generate(float buf[], size_t nsamples, float cps) {
         // update the shift counter, determine how many shifts are needed
         mShiftCounter += cyclesWhole;
 
-        while (mShiftCounter >= mShiftCounterMax) {
-            mShiftCounter -= mShiftCounterMax;
-            
-            // xor bits 1 and 0 of the lfsr
-            uint8_t result = (mLfsr & 0x1) ^ ((mLfsr >> 1) & 0x1);
-            // shift the register
-            mLfsr >>= 1;
-            // set the resulting xor to bit 15 (feedback)
-            mLfsr |= result << 14;
-            if (mStepSelection == Gbs::NOISE_STEPS_7) {
-                // 7-bit lfsr, set bit 7 with the result
-                mLfsr &= ~0x40; // reset bit 7
-                mLfsr |= result << 6; // set bit 7 result
-            }
-        }
+        shift();
 
         if (mLfsr & 0x1) {
             // output is bit 0 inverted, so if bit 0 == 1, output MIN
@@ -80,11 +66,38 @@ void NoiseGen::reset() {
     mLfsr = LFSR_INIT;
 }
 
+void NoiseGen::run(size_t nsamples, float cps) {
+    // this might overflow
+    float cycles = (nsamples * cps) + mDrift;
+    unsigned cyclesWhole = static_cast<unsigned>(cycles);
+    mDrift = cycles - cyclesWhole;
+    mShiftCounter += cyclesWhole;
+    shift();
+}
+
 void NoiseGen::setNoise(uint8_t noiseReg) {
     mDrf = noiseReg & 0x7;
     mStepSelection = static_cast<Gbs::NoiseSteps>((noiseReg >> 3) & 1);
     mScf = noiseReg >> 4;
     mShiftCounterMax = calcCounterMax(mDrf, mScf);
+}
+
+void NoiseGen::shift() {
+    while (mShiftCounter >= mShiftCounterMax) {
+        mShiftCounter -= mShiftCounterMax;
+
+        // xor bits 1 and 0 of the lfsr
+        uint8_t result = (mLfsr & 0x1) ^ ((mLfsr >> 1) & 0x1);
+        // shift the register
+        mLfsr >>= 1;
+        // set the resulting xor to bit 15 (feedback)
+        mLfsr |= result << 14;
+        if (mStepSelection == Gbs::NOISE_STEPS_7) {
+            // 7-bit lfsr, set bit 7 with the result
+            mLfsr &= ~0x40; // reset bit 7
+            mLfsr |= result << 6; // set bit 7 result
+        }
+    }
 }
 
 

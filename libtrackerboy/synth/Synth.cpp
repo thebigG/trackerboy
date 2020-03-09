@@ -295,20 +295,19 @@ void Synth::run(float inbuf[], float outbuf[], size_t nsamples) {
 
     } else {
         // no output, just run the hardware (running the hardware is the same
-        // as generating samples except without generating samples).
+        // as generate except without actually generating samples).
         switch (ch) {
-            // TODO: implement run method for Osc and NoiseGen
             case ChType::ch1:
-                //mHf.osc1.run(nsamples);
+                mHf.osc1.run(nsamples);
                 break;
             case ChType::ch2:
-                //mHf.osc2.run(nsamples);
+                mHf.osc2.run(nsamples);
                 break;
             case ChType::ch3:
-                //mHf.osc3.run(nsamples);
+                mHf.osc3.run(nsamples);
                 break;
             case ChType::ch4:
-                //mHf.gen4.run(nsamples, mCyclesPerSample);
+                mHf.gen4.run(nsamples, mCyclesPerSample);
                 break;
 
         }
