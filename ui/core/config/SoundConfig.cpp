@@ -106,6 +106,7 @@ void SoundConfig::setQuality(int quality) {
 }
 
 void SoundConfig::readSettings(QSettings &settings) {
+    qWarning() << "readSettings 0";
     settings.beginGroup(Keys::Sound);
 
     //
@@ -156,27 +157,40 @@ void SoundConfig::readSettings(QSettings &settings) {
 }
 
 void SoundConfig::writeSettings(QSettings &settings) const {
+    qWarning() << "0";
     settings.beginGroup(Keys::Sound);
     settings.remove(QString());
+    qWarning() << "1";
 
     QString api;
     auto &prober = AudioProber::instance();
     if (mBackendIndex != -1) {
         api = prober.backendNames()[mBackendIndex];
     }
+    qWarning()<<"2";
     settings.setValue(Keys::api, api);
+    qWarning()<<"3";
 
     QByteArray id;
     auto devId = prober.deviceId(mBackendIndex, mDeviceIndex);
+    qWarning()<<"4";
     if (devId) {
+        qWarning()<<"5";
         id = QByteArray(reinterpret_cast<char*>(devId), sizeof(ma_device_id));
     }
+    qWarning()<<"5";
+
     settings.setValue(Keys::deviceId, id);
+
+    qWarning()<<"6";
 
     settings.setValue(Keys::samplerate, samplerate());
     settings.setValue(Keys::latency, mLatency);
     settings.setValue(Keys::period, mPeriod);
     settings.setValue(Keys::quality, mQuality);
+
+    qWarning()<<"***************\n\n\n\n\n\n";
+
 
     settings.endGroup();
 }

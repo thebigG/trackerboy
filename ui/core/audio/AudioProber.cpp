@@ -102,17 +102,28 @@ void AudioProber::Context::enumerate(const ma_device_info* info) {
 
 
 void AudioProber::Context::probe() {
+    qWarning()<<"probe1";
     if (mContext == nullptr) {
+        qWarning()<<"probe2";
         get(); // get calls probe when allocating context
+        qWarning()<<"probe3";
         return;
     }
 
+    qWarning()<<"probe4";
     mDevices.clear();
+    qWarning()<<"probe5";
     auto result = ma_context_enumerate_devices(mContext.get(), enumerateCallback, this);
+    qWarning()<<"probe6";
 
     if (result != MA_SUCCESS) {
+        qWarning()<<"probe6";
         mDevices.clear();
+        qWarning()<<"probe6.5";
     }
+
+    qWarning()<<"probe7";
+
 }
 
 

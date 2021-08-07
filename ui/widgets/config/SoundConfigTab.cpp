@@ -8,6 +8,7 @@
 #include <array>
 #include <optional>
 #include <cmath>
+#include <QDebug>
 
 #include <QSignalBlocker>
 
@@ -170,9 +171,13 @@ void SoundConfigTab::qualityRadioToggled(QAbstractButton *btn, bool checked) {
 }
 
 void SoundConfigTab::apiChanged(int index) {
+    qWarning()<<"apiChanged1";
     Q_UNUSED(index)
+    qWarning()<<"apiChanged2";
     rescan(true); // new api selected, pick the default device
+    qWarning()<<"apiChanged3";
     setDirty();
+    qWarning()<<"apiChanged4";
 }
 
 void SoundConfigTab::populateDevices() {
@@ -182,17 +187,29 @@ void SoundConfigTab::populateDevices() {
 }
 
 void SoundConfigTab::rescan(bool rescanDueToApiChange) {
+
+    qWarning()<<"rescan1";
     
     auto const backendIndex = mApiCombo.currentIndex();
 
+    qWarning()<<"rescan2:"<<backendIndex;
+
     auto &prober = AudioProber::instance();
+
+    qWarning()<<"rescan3";
     
     mDeviceCombo.blockSignals(true);
 
+    qWarning()<<"rescan4";
     if (rescanDueToApiChange) {
+        qWarning()<<"rescan4.5"<<backendIndex;
         prober.probe(backendIndex);
+        qWarning()<<"rescan5";
         populateDevices();
+        qWarning()<<"rescan6";
         mDeviceCombo.setCurrentIndex(0); // default
+        qWarning()<<"rescan7";
+
     } else {
 
         // get a copy of the current id

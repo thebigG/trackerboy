@@ -9,7 +9,7 @@ Documentation: https://miniaud.io/docs
 GitHub:        https://github.com/mackron/miniaudio
 */
 #include "miniaudio.h"
-
+#include <stdlib.h>
 #ifndef miniaudio_c
 #define miniaudio_c
 
@@ -1835,7 +1835,12 @@ static void* ma__realloc_default(void* p, size_t sz, void* pUserData)
 static void ma__free_default(void* p, void* pUserData)
 {
     (void)pUserData;
-    MA_FREE(p);
+    //FIXME:When switching to Jack and then back to PulseAudio, p behaves
+    // as if it already has been freed.
+    if(*((int*)p) != 0)
+    {
+        MA_FREE(p);
+    }
 }
 
 
@@ -26788,21 +26793,35 @@ MA_API ma_log* ma_context_get_log(ma_context* pContext)
 
 MA_API ma_result ma_context_enumerate_devices(ma_context* pContext, ma_enum_devices_callback_proc callback, void* pUserData)
 {
+    printf("ma_context_enumerate_devices1");
     ma_result result;
 
+    printf("ma_context_enumerate_devices2\n");
+
+
     if (pContext == NULL || callback == NULL) {
+        printf("ma_context_enumerate_devices3\n");
         return MA_INVALID_ARGS;
     }
 
+    printf("ma_context_enumerate_devices3\n");
+
     if (pContext->callbacks.onContextEnumerateDevices == NULL) {
+        printf("ma_context_enumerate_devices4\n");
         return MA_INVALID_OPERATION;
     }
 
+    printf("ma_context_enumerate_devices5\n");
     ma_mutex_lock(&pContext->deviceEnumLock);
     {
+        printf("ma_context_enumerate_devices6\n");
         result = pContext->callbacks.onContextEnumerateDevices(pContext, callback, pUserData);
+        printf("ma_context_enumerate_devices7\n");
     }
+
+    printf("ma_context_enumerate_devices8\n");
     ma_mutex_unlock(&pContext->deviceEnumLock);
+    printf("ma_context_enumerate_devices9\n");
 
     return result;
 }
