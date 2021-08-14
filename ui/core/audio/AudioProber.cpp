@@ -43,7 +43,11 @@ ma_context* AudioProber::Context::get() {
 
         auto config = ma_context_config_init();
         config.logCallback = logCallback;
-        ma_context_init(&mBackend, 1, &config, mContext.get());
+
+        int res = ma_context_init(&mBackend, 1, &config, mContext.get());
+
+        qWarning()<< "res from init-->"<<res;
+
         probe();
     }
     return mContext.get();
